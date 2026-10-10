@@ -11,6 +11,10 @@ STATIC = Path(__file__).parent / "static"
 
 
 class Handler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        if args and str(args[1]).startswith(('4', '5')):
+            super().log_message(format, *args)
+
     def send_json(self, value, status=200):
         data = json.dumps(value, ensure_ascii=False).encode()
         self.send_response(status)
@@ -59,7 +63,10 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/v1/scenarios":
             return self.send_json([{**{k: v for k, v in s.items() if k != "call"}, "id": sid} for sid, s in core.SCENARIOS.items()])
         if path == "/api/v1/policies":
-            return self.send_json({"version": core.POLICY_VERSION, "rules": ["Unknown tool and invalid identity: deny", "Capability and resource scope violation: deny", "Restricted data to external destination: deny", "External POST: require exact-call human approval", "Finance aggregate read: allow", "Everything else: deny"]})
+            return self.send_json({"version": core.POLICY_VERSION, "rules": [rule["description"] for rule in core.POLICY["rules"]]})
+        if path == "/api/v1/evaluation":
+            from .evaluation import latest
+            return self.send_json(latest())
         self.send_json({"error": "Not found"}, 404)
 
     def do_POST(self):
@@ -68,6 +75,11 @@ class Handler(BaseHTTPRequestHandler):
             body = self.body()
             if path == "/api/v1/tool-calls":
                 return self.send_json(core.submit(body, self.token()))
+            if path == "/api/v1/evaluation/run":
+                if not core.authenticate(self.token(), "demo"):
+                    return self.send_json({"error": "Demo credential required"}, 401)
+                from .evaluation import run
+                return self.send_json(run(include_llm=body.get("include_llm") is True))
             if path.startswith("/api/v1/demo/run/"):
                 if not core.authenticate(self.token(), "demo"):
                     return self.send_json({"error": "Demo credential required"}, 401)

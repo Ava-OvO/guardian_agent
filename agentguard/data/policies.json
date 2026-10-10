@@ -1,0 +1,18 @@
+{
+  "version": "demo-1.1",
+  "precedence": ["deny", "require_approval", "allow"],
+  "agents": {
+    "finance_assistant": {"role": "finance_analyst", "tools": ["customer_db.query", "http.post"], "scopes": ["demo_customers", "internal_report"]},
+    "research_assistant": {"role": "researcher", "tools": ["http.post"], "scopes": ["public"]}
+  },
+  "resource_labels": {"demo_customers": "restricted", "internal_report": "internal"},
+  "approved_read": {"agent_role": "finance_analyst", "tool": "customer_db.query", "action": "read", "resource": "demo_customers"},
+  "rules": [
+    {"id": "identity_and_capability", "effect": "deny", "description": "Unknown identity, tool, or scope is denied."},
+    {"id": "explicit_untrusted_instruction", "effect": "deny", "description": "Recognized instructions inside untrusted documents are denied."},
+    {"id": "restricted_egress", "effect": "deny", "description": "Restricted demo records cannot be sent externally."},
+    {"id": "external_approval", "effect": "require_approval", "description": "Other outbound sends need exact-call approval."},
+    {"id": "finance_aggregate_read", "effect": "allow", "description": "Finance assistant may read synthetic aggregates."}
+  ],
+  "llm_role": "Advisory injection review only. A model never grants tool permissions or overrides a policy denial."
+}

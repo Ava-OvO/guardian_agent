@@ -9,13 +9,14 @@ cd /Users/iron9/Documents/Coding/guardian_agent
 python3 -m agentguard.server
 ```
 
-Open **http://127.0.0.1:8000**. The dashboard is in Chinese and presents the decision before the technical details. Go to **动手体验**, run S1–S5, then inspect **调用记录**, **安全总览**, and **待人工确认**. For S4, click **批准模拟执行** or **拒绝**. The default local approver token is `demo-approver-token`; change all demo tokens via environment variables before sharing the machine or binding to a non-loopback address. The dashboard polls every three seconds.
+Open **http://127.0.0.1:8000**. The dashboard is in English and presents the decision before the technical details. Go to **Interactive Demo**, run S1–S5, then inspect **Tool Call Log**, **Security Overview**, and **Approvals**. For S4, click **Approve mock execution** or **Reject**. The default local approver token is `demo-approver-token`; change all demo tokens via environment variables before sharing the machine or binding to a non-loopback address. The dashboard polls every three seconds.
 
 CLI replay:
 
 ```bash
 python3 -m agentguard.demo.scenarios all
 python3 -m unittest discover -s agentguard/tests -v
+python3 -m agentguard.main evaluate
 ```
 
 Health and API examples:
@@ -30,6 +31,14 @@ curl -X POST -H 'Authorization: Bearer demo-finance-token' -H 'Content-Type: app
 ```
 
 `GET /api/v1/approvals` returns the `args_digest` for each pending request. Send it in `{"args_digest":"..."}` to `POST /api/v1/approvals/{id}/approve` or `/reject` with `Authorization: Bearer <approver-token>`. Approval expires after ten minutes and is one-use.
+
+## Policy versus LLM Guardian
+
+The project now includes `blue_agent.py`, `red_agent.py`, `guardian.py`, `tools.py`, `evaluation.py`, `dashboard.py`, synthetic `data/attacks.json`, and `results/test_results.json` under `agentguard/`. The built-in dashboard has a **方案评估** page. `agentguard/dashboard.py` is an optional Streamlit view.
+
+Run `python3 -m agentguard.main evaluate` for the deterministic baseline. On the eight synthetic cases currently included, policy alone matches six exact decisions (75%), with one malicious case allowed and another queued for approval instead of denied. This small benchmark is illustrative, not a production security rate.
+
+To test an actual model, provide a credential-free HTTPS OpenAI-compatible chat-completions URL plus model name and API key through `AGENTGUARD_LLM_URL`, `AGENTGUARD_LLM_MODEL`, and `AGENTGUARD_LLM_API_KEY`, then run `python3 -m agentguard.main evaluate --llm`. The key is never written to results. If the Kiro API differs, its request/response contract is needed for an adapter. LLM reviews redacted synthetic content only. Hard policy denial always wins; the model can add an injection-based denial but cannot grant permission. Without configured model credentials, no LLM performance claim is made. More detail is in [agentguard/README.md](agentguard/README.md).
 
 ## Architecture
 
