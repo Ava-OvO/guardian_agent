@@ -9,7 +9,7 @@ cd /Users/iron9/Documents/Coding/guardian_agent
 python3 -m agentguard.server
 ```
 
-Open **http://127.0.0.1:8000**. Go to **Attack Lab**, run S1–S5, then inspect **Live Events**, **Overview**, and **Approvals**. For S4, click Approve or Reject. The default local approver token is `demo-approver-token`; change all demo tokens via environment variables before sharing the machine or binding to a non-loopback address. The dashboard polls every three seconds.
+Open **http://127.0.0.1:8000**. The dashboard is in Chinese and presents the decision before the technical details. Go to **动手体验**, run S1–S5, then inspect **调用记录**, **安全总览**, and **待人工确认**. For S4, click **批准模拟执行** or **拒绝**. The default local approver token is `demo-approver-token`; change all demo tokens via environment variables before sharing the machine or binding to a non-loopback address. The dashboard polls every three seconds.
 
 CLI replay:
 

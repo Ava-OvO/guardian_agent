@@ -32,7 +32,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = urlparse(self.path).path
-        if path in ("/", "/index.html", "/app.js", "/style.css"):
+        if path in ("/", "/index.html", "/app.js", "/style.css", "/friendly.css"):
             name = "index.html" if path == "/" else path[1:]
             data = (STATIC / name).read_bytes()
             mime = "text/html" if name.endswith("html") else "text/javascript" if name.endswith("js") else "text/css"
