@@ -5,7 +5,8 @@ Python-only agent runtime security gateway and SOC dashboard for the Secure Hori
 ## Run locally
 
 ```bash
-cd /Users/iron9/Documents/Coding/guardian_agent
+git clone https://github.com/Ava-OvO/guardian_agent.git
+cd guardian_agent
 python3 -m agentguard.server
 ```
 
